@@ -2,13 +2,16 @@ import socket
 
 class ClientSocket:
     def __init__(self, socket_addr :tuple) -> None:
-            self._socket, self._addr = socket_addr
+        self._socket, self._addr = socket_addr
         
     def send(self, message):
         return self._socket.send(message)
 
-    def recv(self, message):
+    def recv(self):
         return self._socket.recv(2048)
+
+    def close(self):
+        self._socket.close()
 
 class TCP_server:
     def __init__(self) -> None:

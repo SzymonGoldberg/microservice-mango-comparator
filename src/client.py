@@ -1,6 +1,5 @@
-import socket
-from time import sleep
-from commons.tcp_client import Tcp_client
+import socket, json
+from tcp_client import Tcp_client
 
 
 def main():
@@ -9,28 +8,25 @@ def main():
         client_socket.connect((socket.gethostname(), 8080))
         
         client_socket.send("{ \"method\" : 0 }")
-        port = client_socket.receive()
+        compute_addr = client_socket.receive()
         client_socket.close()
     except OSError:
         print("connection with sheduler goes wrong")
         return
 
     client_socket = Tcp_client()
-    for _ in range(10):
-        try:
-            client_socket.connect(port)
-        except OSError:
-            print("cannot connect to compute unit, retrying in 10 seconds")
-            sleep(5)
+    json_compute_addr = json.loads(compute_addr)
+    client_socket.connect(tuple([json_compute_addr['host'], json_compute_addr['port']]))
+
     try:
-        client_socket.send("{ \"string\":\"" + input("insert you string to compare") 
-            + "\", \"compare string\": 0")
+        client_socket.send("{ \"string\":\"" + input("insert you string to compare -> ") 
+            + "\", \"cmp\": 0}")
         result =  client_socket.receive()
         client_socket.close()
     except OSError:
         print("problem with sending/receiving from computing unit occured")
         return
-    print("result = ",result)
+    print("result = ", json.loads(result)["result"])
 
 if __name__ == "__main__":
     main()
