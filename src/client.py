@@ -1,11 +1,12 @@
 import socket, json
 from tcp_client import Tcp_client
+from addresses_global import SCHEDULER_IP_PORT
 
-
-def main():
+def get_compute_unit_addr():
+    compute_addr = None
     try:
         client_socket = Tcp_client()
-        client_socket.connect((socket.gethostname(), 8080))
+        client_socket.connect(SCHEDULER_IP_PORT)
         
         client_socket.send("{ \"method\" : 0 }")
         compute_addr = client_socket.receive()
@@ -13,10 +14,14 @@ def main():
     except OSError:
         print("connection with sheduler goes wrong")
         return
-
-    client_socket = Tcp_client()
     json_compute_addr = json.loads(compute_addr)
-    client_socket.connect(tuple([json_compute_addr['host'], json_compute_addr['port']]))
+    return tuple([json_compute_addr['host'], json_compute_addr['port']])
+
+
+def main():
+    compute_addr = get_compute_unit_addr()
+    client_socket = Tcp_client()
+    client_socket.connect(compute_addr)
 
     try:
         client_socket.send("{ \"string\":\"" + input("insert you string to compare -> ") 

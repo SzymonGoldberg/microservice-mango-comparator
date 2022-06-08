@@ -12,10 +12,10 @@ def main():
         client = ClientSocket(server.accept())
         request = json.loads(client.recv())
         JOURNAL.append({
-            "input" : request["input"], 
+            "input"         : request["input"], 
             "cmp_string_id" : request["cmp_string_id"],
-            "method_id" : request["method_id"],
-            "result" : request["result"]})
+            "method_id"     : request["method_id"],
+            "result"        : request["result"]})
         client._socket.close()
         print(JOURNAL)
 

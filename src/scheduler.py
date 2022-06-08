@@ -1,7 +1,7 @@
 from numpy import save
 from tcp_client import Tcp_client
 from tcp_server import TCP_server, ClientSocket
-from addresses_global import COLD_DATASET_IP_PORT, JOURNAL_IP_PORT
+from addresses_global import COLD_DATASET_IP_PORT, JOURNAL_IP_PORT, SCHEDULER_IP_PORT
 import socket, json, difflib
 
 def get_data_from_cold(string_id):
@@ -48,7 +48,7 @@ def compute_unit(port):
 def main():
     try:
         server = TCP_server()
-        server.bind(8080)
+        server.bind(SCHEDULER_IP_PORT[1])
         server.listen()
         client = ClientSocket(server.accept())
         compute_unit_port = 8800
