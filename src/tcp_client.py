@@ -1,5 +1,6 @@
 import socket
 
+
 class Tcp_client:
     def __init__(self) -> None:
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -15,4 +16,3 @@ class Tcp_client:
 
     def close(self) -> None:
         self._socket.close()
-

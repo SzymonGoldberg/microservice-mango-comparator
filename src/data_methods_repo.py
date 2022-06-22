@@ -3,14 +3,12 @@ from tcp_server import ClientSocket, TCP_server
 from addresses_global import DATA_METHODS_REPO_IP_PORT
 import json
 
-METHODS = [
-    "nice",
-    "naive"
-]
+METHODS = ["nice", "naive"]
 
 mymongo = pymongo.MongoClient("mongodb://localhost:27017")
 database = mymongo["cold_database"]
 COLLECTION = database["collection"]
+
 
 def main():
     server = TCP_server()
@@ -23,8 +21,9 @@ def main():
             to_send = METHODS
         else:
             to_send = [x["string"] for x in COLLECTION.find()]
-        client.send(json.dumps({"string" : to_send}).encode())
+        client.send(json.dumps({"string": to_send}).encode())
         client.close()
+
 
 if __name__ == "__main__":
     main()

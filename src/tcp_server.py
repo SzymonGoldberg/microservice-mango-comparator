@@ -1,9 +1,10 @@
 import socket
 
+
 class ClientSocket:
-    def __init__(self, socket_addr :tuple) -> None:
+    def __init__(self, socket_addr: tuple) -> None:
         self._socket, self._addr = socket_addr
-        
+
     def send(self, message):
         return self._socket.send(message)
 
@@ -12,6 +13,7 @@ class ClientSocket:
 
     def close(self):
         self._socket.close()
+
 
 class TCP_server:
     def __init__(self) -> None:
