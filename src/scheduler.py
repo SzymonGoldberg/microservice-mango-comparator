@@ -1,64 +1,29 @@
-from numpy import save
-from tcp_client import Tcp_client
+import random
 from tcp_server import TCP_server, ClientSocket
-from addresses_global import COLD_DATASET_IP_PORT, JOURNAL_IP_PORT, SCHEDULER_IP_PORT
-import socket, json, difflib
-
-def get_data_from_cold(string_id):
-    cold_dataset_connection = Tcp_client()
-    cold_dataset_connection.connect(COLD_DATASET_IP_PORT)
-    cold_dataset_connection.send(json.dumps({"string_id" : string_id}))
-    result = json.loads(cold_dataset_connection.receive())["string"]
-    cold_dataset_connection.close()
-    return result
-
-def save_to_journal(input_string, cmp_string_id, method_id, result):
-    try:
-        journal_connection = Tcp_client()
-        journal_connection.connect(JOURNAL_IP_PORT)
-        journal_connection.send(json.dumps(
-            {"input" : input_string,
-            "cmp_string_id" : cmp_string_id,
-            "method_id" : method_id,
-            "result" : result}))
-    except OSError:
-        print("journal is not working now")
-    finally:
-        journal_connection.close()
-
-def compute_unit(port):
-    try:
-        print("new compute unit opened")
-        server = TCP_server()
-        server.bind(port)
-        server.listen()
-        client = ClientSocket(server.accept())
-        print("client connected")
-        request = json.loads(client.recv())
-        print(request)
-        cmp_string = get_data_from_cold(request["cmp"])
-        result = difflib.SequenceMatcher(None, request["string"], cmp_string).ratio()
-        client.send(json.dumps({"result" : result}).encode())
-        save_to_journal(request["string"], request["cmp"], 0, result)
-    except OSError:
-        print("compute unit is broken")
-    finally:
-        server.close()
+from addresses_global import SCHEDULER_IP_PORT
+import socket, json
+import subprocess
+from compute_unit import main as c
 
 def main():
     try:
         server = TCP_server()
         server.bind(SCHEDULER_IP_PORT[1])
         server.listen()
-        client = ClientSocket(server.accept())
-        compute_unit_port = 8800
-        request = json.dumps({"host" : socket.gethostname(), "port" : compute_unit_port}).encode()
-        client.send(request)
+        while True:
+            client = ClientSocket(server.accept())
+            request = json.loads(client.recv())
+            compute_unit_port = random.randint(6000, 8000)
+            method = request["method"]
+            p = subprocess.Popen(f"python3 compute_unit.py {compute_unit_port} {method}", shell=True)
+            print("new process = ", p.pid)
+            request = json.dumps({"host" : socket.gethostname(), "port" : compute_unit_port}).encode()
+            client.send(request)
+            client.close()
     except OSError:
         print("sheduler server is broken")
     finally:
         server.close()
-    compute_unit(compute_unit_port)
 
 if __name__ == "__main__":
     main()
